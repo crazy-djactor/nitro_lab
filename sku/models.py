@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class SKU(models.Model):
 
     s_id = models.CharField(primary_key=True, max_length=4)

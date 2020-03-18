@@ -21,15 +21,15 @@ class OrderLog(models.Model):
     """Order_Date
     """
 
-    p_id = models.ForeignKey(POS,  on_delete=models.CASCADE)
+    p_id = models.ForeignKey(POS, on_delete=models.CASCADE)
     """foreign key POS_ID
     """
 
-    payment_ID = models.ForeignKey(PaymentDataStream,  on_delete=models.CASCADE)
+    payment_ID = models.ForeignKey(PaymentDataStream, on_delete=models.CASCADE)
     """foreign key Payment ID
     """
 
-    payment_status = models.ForeignKey(PaymentDataStream,  on_delete=models.CASCADE)
+    payment_status = models.ForeignKey(PaymentDataStream, on_delete=models.CASCADE)
     """foreign key payment status
     """
 
