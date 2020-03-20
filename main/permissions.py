@@ -8,8 +8,6 @@ class IsAuthenticatedOrReadOnly(permissions.BasePermission):
     """
 
     def has_object_permission(self, request, view, obj):
-        # Read permissions are allowed to any request,
-        # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in permissions.SAFE_METHODS:
             return True
 
@@ -29,3 +27,22 @@ class IsAuthenticated(permissions.BasePermission):
             return is_it
         else:
             raise PermissionDenied(detail=message)
+
+
+class IsAdminOrAuthenticated(permissions.BasePermission):
+    def has_permission(self, request, view):
+        message = "Permission Denied"
+
+        if request.method in permissions.SAFE_METHODS:
+            is_it = bool(request.user and request.user.is_authenticated)
+            if is_it:
+                return is_it
+            else:
+                raise PermissionDenied(detail=message)
+        else:
+            is_it = bool(request.user and request.user.is_staff)
+            if is_it:
+                return is_it
+            else:
+                message = "Permission Denied"
+                raise PermissionDenied(detail=message)
