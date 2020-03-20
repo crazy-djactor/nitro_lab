@@ -24,7 +24,7 @@ Server Side API data for RPI sensors and data
 - Install python packages
 
     ```bash
-    sudo pip install virtualenv
+    sudo apt install -y virtualenv
     virtualenv -p python3 venv
     source venv/bin/activate
     pip install -r requirements.txt
