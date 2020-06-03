@@ -1,6 +1,8 @@
 # NitroLabsAPI
+NitroLab is the automatic selling drinks machine in which be integrated with RPi.
 
-Server Side API data for RPI sensors and data
+
+Server Side API data for POS and User
 
 
 ## Installation
@@ -8,8 +10,7 @@ Server Side API data for RPI sensors and data
 - Install PostgreSQL
     ```bash
     sudo apt update
-    sudo apt install -y python-pip python-dev libpq-dev postgresql postgresql-contrib
-    
+    sudo apt install -y python-pip python3-dev libpq-dev postgresql postgresql-contrib
     sudo su - postgres
     psql
 

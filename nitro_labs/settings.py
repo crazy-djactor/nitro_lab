@@ -161,7 +161,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/mediafiles/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'mediafiles')
 
-# STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static/images'), ]
 
 
 REST_FRAMEWORK = {
@@ -231,3 +231,5 @@ SWAGGER_SETTINGS = {
 REDOC_SETTINGS = {
 
 }
+
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240

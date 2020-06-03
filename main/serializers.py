@@ -1,29 +1,29 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from main.models import POS, SKU
+from rest_framework_simplejwt.serializers import TokenObtainSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+
+
+from main.models import POS, SKU, Service, ServiceLog, Matching, Customer
 
 
 class POSSerializer(serializers.ModelSerializer):
     class Meta:
         model = POS
-        fields = ('p_id', 'location', 'deploy_state', 'wifinetwork', 'wifiusername',
-                  'wifipassword')
+        fields = ('pos_id', 'location', 'deploy_state', 'pos_sn', 'pos_auth_string')
 
     def create(self, validated_data):
-        _p_id = validated_data.get('p_id')
+        _pos_id = validated_data.get('pos_id')
+        _pos_sn = validated_data.get('pos_sn')
         _location = validated_data.get('location')
         _deploy_state = validated_data.get('deploy_state')
-        _wifinetwork = validated_data.get('wifinetwork')
-        _wifiusername = validated_data.get('wifiusername')
-        _wifipassword = validated_data.get('wifipassword')
 
         new_pos_dict = {
-            "p_id": _p_id,
+            "pos_id": _pos_id,
+            "pos_sn": _pos_sn,
             "location": _location,
             "deploy_state": _deploy_state,
-            "wifinetwork": _wifinetwork,
-            "wifiusername": _wifiusername,
-            "wifipassword": _wifipassword,
+            "pos_auth_string": ""
         }
 
         try:
@@ -35,75 +35,70 @@ class POSSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         """
-        Update and return an existing `SKU` instance, given the validated data.
+        Update and return an existing `POS` instance, given the validated data.
         """
-        instance.p_id = validated_data.get('p_id', instance.p_id)
+        instance.pos_id = validated_data.get('pos_id', instance.pos_id)
+        instance.pos_sn = validated_data.get('pos_sn', instance.pos_sn)
         instance.location = validated_data.get('location', instance.location)
         instance.deploy_state = validated_data.get('deploy_state', instance.deploy_state)
-        instance.wifinetwork = validated_data.get('wifinetwork', instance.wifinetwork)
-        instance.wifiusername = validated_data.get('wifiusername', instance.wifiusername)
-        instance.wifipassword = validated_data.get('wifipassword', instance.wifipassword)
+        instance.pos_auth_string = validated_data.get('pos_auth_string', instance.pos_auth_string)
         instance.save()
         return instance
+
+
+class MatchingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Matching
+        fields = '__all__'
 
 
 class SKUSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = SKU
-        fields = ('s_id', 'name', 'desc', 'volume', 'volumeunits',
-                  'volumeunitprice')
+        fields = ('sku_id', 'name', 'desc', 'volume', 'volume_units', 'volume_unit_price_guest',
+                  'volume_unit_price_customer', 'image_path', 'image_path2', 'batch_no', 'last_change')
+        read_only_fields = ('last_change', 'image_path', 'image_path2')
+
+
+class CustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields = '__all__'
+
+
+class ServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = ('service_id', 'service_name', 'service_description')
+
+
+class ServiceLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceLog
+        fields = '__all__'
+
+
+class AdminSerializer(TokenObtainSerializer):
 
     def create(self, validated_data):
-        _sid = validated_data.get('s_id')
-        _name = validated_data.get('name')
-        _desc = validated_data.get('desc')
-        _volume = validated_data.get('volume')
-        _volumeunits = validated_data.get('volumeunits')
-        _volumeunitprice = validated_data.get('volumeunitprice')
-
-        new_sku_dict = {
-            "s_id": _sid,
-            "name": _name,
-            "desc": _desc,
-            "volume": _volume,
-            "volumeunits": _volumeunits,
-            "volumeunitprice": _volumeunitprice,
-        }
-        try:
-            sku = SKU.objects.create(**new_sku_dict)
-        except Exception as e:
-            print(e)
-            return None
-        return sku
+        pass
 
     def update(self, instance, validated_data):
-        """
-        Update and return an existing `SKU` instance, given the validated data.
-        """
-        instance.name = validated_data.get('name', instance.name)
-        instance.desc = validated_data.get('desc', instance.desc)
-        instance.volume = validated_data.get('volume', instance.volume)
-        instance.volumeunits = validated_data.get('volumeunits', instance.volumeunits)
-        instance.volumeunitprice = validated_data.get('volumeunitprice', instance.volumeunitprice)
-        instance.save()
-        return instance
+        pass
 
+    @classmethod
+    def get_token(cls, user):
+        return RefreshToken.for_user(user)
 
-class UserSerializer(serializers.ModelSerializer):
-    phone_number = serializers.SerializerMethodField()
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        login_user = User.objects.get(username=attrs['username'])
 
-    def get_phone_number(self, obj):
-        return obj.profile.phone_number
+        refresh = self.get_token(self.user)
 
-    class Meta:
-        model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'phone_number')
+        data['is_admin'] = login_user.is_staff
+        data['refresh'] = str(refresh)
+        data['access'] = str(refresh.access_token)
 
-
-class CreateUserSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=150)
-    password = serializers.CharField(max_length=128)
-    email = serializers.EmailField()
-    first_name = serializers.CharField()
-    last_name = serializers.CharField()
-    phone_number = serializers.CharField()
+        return data
