@@ -1,6 +1,6 @@
 boto3==1.10.26
 certifi==2019.11.28
-Django==2.2.10
+Django==2.2.27
 django-admin==2.0.0
 django-allauth==0.40.0
 django-rest-auth==0.9.5
